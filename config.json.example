@@ -1,0 +1,11 @@
+{
+    "jid": "1234567@chat.codingame.com",
+    "password": "password",
+    "host": "chat.codingame.com",
+    "port": 5222,
+    "muc": "conference.codingame.com",
+    "groupchats": ["world"],
+    "nickname": "nickname",
+    "core": "../cgbot-core/cgbot Automaton2000",
+    "data": "./data"
+}
