@@ -51,7 +51,7 @@ let sendMessage = function(conference, message) {
 const responseHandlers = [
   {
     name : "clash of code",
-    check : function(message) { return message.indexOf("https://www.codingame.com/clashofcode/clash") >= 0 },
+    check : function(message) { return message.indexOf("https://www.codingame.com/clashofcode/clash") >= 0 && message.indexOf("report") == -1 },
     do : function(user) { return "hey " + user + ", dont paste those links here.  Use the channel #clash" }
   },
   {
