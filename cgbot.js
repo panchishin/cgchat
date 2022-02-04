@@ -22,7 +22,7 @@ let kill = (code) => {
   responseHandler.save();
   console.log('[INFO] Closing process');
   clearInterval(queueTimer);
-  setTimeout(() => process.exit(code), 1000);
+  setTimeout(() => process.exit(code), 5000);
 };
 
 function startQueueTimer() {

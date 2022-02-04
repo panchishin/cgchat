@@ -1,6 +1,7 @@
 config.json
 config.json.antiwonto
 config.json.wontonimo
+users.json
 
 # Logs
 logs
