@@ -4,8 +4,5 @@
     "host": "chat.codingame.com",
     "port": 5222,
     "muc": "conference.codingame.com",
-    "groupchats": ["world"],
-    "nickname": "nickname",
-    "core": "../cgbot-core/cgbot Automaton2000",
-    "data": "./data"
+    "groupchats": ["welcome", "testworld"]
 }
