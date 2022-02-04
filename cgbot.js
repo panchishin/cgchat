@@ -56,7 +56,10 @@ const responseHandlers = [
   },
   {
     name : "hi wontonimo",
-    check : function(message) { return message.toLowerCase().match("(hi|hey|hello) *wontonimo.?") },
+    check : function(message) { 
+      let m = " "+message.toLowerCase() + " ";
+      return !!m.match("[^a-z0-1](hi|hey|hello)[^a-z0-1]") && !!m.match("[^a-z0-1](won|wontonimo)[^a-z0-1]") && m.length < 30;
+    },
     do : function(user) { return "hey there " + user }
   }
 ]
@@ -77,10 +80,10 @@ xmpp.on('online', data => {
   }, 5000);
 });
 
-xmpp.on('chat', function(from, message) {
-  console.log("[Personal Received] " + from + " : '" + message + "'");
-  //xmpp.send(from, 'echo: ' + message);
-});
+// xmpp.on('chat', function(from, message) {
+//   console.log("[Personal Received] " + from + " : '" + message + "'");
+//   //xmpp.send(from, 'echo: ' + message);
+// });
 
 xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
   console.log("[Group Received] " + from + " : '" + message + "'");
