@@ -1,9 +1,14 @@
-/*eslint-env es6, node*/
-"use strict";
+'use strict';
+
+const responseHandler = require('./responseHandlers.js');
+
+
 
 const xmpp = require('simple-xmpp'),
       config = require('./config.json'),
       Stanza = require('node-xmpp-client').Stanza;
+
+
 
 let queueTimer = null,
     queue = [],
@@ -14,6 +19,7 @@ let queueTimer = null,
 let kill = (code) => {
   if (killed) { return; }
   killed = true;
+  responseHandler.save();
   console.log('[INFO] Closing process');
   clearInterval(queueTimer);
   setTimeout(() => process.exit(code), 1000);
@@ -42,27 +48,15 @@ let sendMessage = function(conference, message) {
       stanza.c('body').t(message);  
 
       queue.push(stanza);
+      console.log("[QUEUED] " + message);
+
       startQueueTimer();
+
     } catch (e) {
       console.log('[ERROR]', e);
     }
 }
 
-const responseHandlers = [
-  {
-    name : "clash of code",
-    check : function(message) { return message.indexOf("https://www.codingame.com/clashofcode/clash") >= 0 && message.indexOf("report") == -1 },
-    do : function(user) { return "hey " + user + ", dont paste those links here.  Use the channel #clash" }
-  },
-  {
-    name : "hi wontonimo",
-    check : function(message) { 
-      let m = " "+message.toLowerCase() + " ";
-      return !!m.match("[^a-z0-1](hi|hey|hello)[^a-z0-1]") && !!m.match("[^a-z0-1](won|wontonimo)[^a-z0-1]") && m.length < 30;
-    },
-    do : function(user) { return "hey there " + user }
-  }
-]
 
 
 
@@ -87,17 +81,17 @@ xmpp.on('online', data => {
 
 xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
   console.log("[Group Received] " + from + " : '" + message + "'");
-  if (readyToRespond) {
-    for (let handler of responseHandlers) {
-      if (handler.check(message)) {
-        console.log("[Matched response] " + handler.name)
-        sendMessage(conference, "[automated] " + handler.do(from));
+  if (readyToRespond && from != config.nickname) {
+    for (let handlerName of Object.keys(responseHandler.handlers)) {
+      let handler = responseHandler.handlers[handlerName];
+      if (handler.check(from, message)) {
+        console.log("[Matched response] " + conference + " " + handlerName);
+        sendMessage(conference, "[automated] " + handler.do(from, message));
         break;
-      } else {
-        // console.log("[Skipped response] " + handler.name)
       }
     }
   }
+  responseHandler.track(from,message);
 });
 
 xmpp.on('error', error => {
@@ -122,4 +116,4 @@ process.on('exit', kill);
 process.on('SIGINT', kill);
 process.on('SIGUSR1', kill);
 process.on('SIGUSR2', kill);
-process.on('uncaughtException', kill);
+// process.on('uncaughtException', kill);
