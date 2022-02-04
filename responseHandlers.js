@@ -36,7 +36,7 @@ function unknownUserCheck(user, message) {
 }
 
 function unknownUserDo(user, message) {
-	return "Welcome " + user + ", have't seen you before :wave:\nA friendly reminder to be respectful\nhttps://www.codingame.com/playgrounds/40701/help-center/code-of-conduct";
+	return "Welcome " + user + ", have't seen you before\nA friendly reminder to be respectful";
 }
 
 function knownUserCheck(user, message) {
@@ -77,10 +77,10 @@ exports.save = saveKnownUsers;
 exports.track = trackUser;
 exports.knownUsers = function() { return knownUsers; };
 exports.handlers = {
-	"unknown user" : {
-		check : unknownUserCheck,
-		do : unknownUserDo
-	},
+	// "unknown user" : {
+	// 	check : unknownUserCheck,
+	// 	do : unknownUserDo
+	// },
 	"naughty language" : {
 		check : badLanguage,
 		do : function(user, message) { return user + " be respectful and watch your language\nhttps://www.codingame.com/playgrounds/40701/help-center/code-of-conduct" }
