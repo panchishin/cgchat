@@ -11,8 +11,9 @@ function loadKnownUsers() {
 
 function saveKnownUsers() {
 	try {
+		console.log("[SAVING] started knownUsers");
 		fs.writeFileSync('users.json', JSON.stringify(knownUsers));
-		console.log("[SAVED] knownUsers");
+		console.log("[SAVING] finished knownUsers");
 	} catch (error) {
 		console.error(err);
 	}
