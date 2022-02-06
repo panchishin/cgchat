@@ -1,11 +1,16 @@
 const fs = require('fs');
 
+function dateTimeZ() { return new Date().toISOString().split('T'); }
+
 let knownUsers = {};
 
 function loadKnownUsers() {
 	fs.readFile('users.json', 'utf-8', (err, data) => {
 		if (err) { throw err; }
 		knownUsers = JSON.parse(data.toString());
+		// for (let user of Object.keys(knownUsers)) {
+		// 	knownUsers[user].messages = knownUsers[user].messages.slice(0,3);
+		// }
 	});
 }
 
@@ -19,17 +24,22 @@ function saveKnownUsers() {
 	}
 }
 
-function trackUser(user, message) {
-	if (!(user in knownUsers)) knownUsers[user] = {};
-	knownUsers[user].lastseen = yyyymmdd();
-
-	if (!('messages' in knownUsers[user])) knownUsers[user].messages = [];
-	knownUsers[user].messages.unshift({text:message, day:yyyymmdd()});
-
-	knownUsers[user].messages = knownUsers[user].messages.slice(0,10);
+function appendLogFile(dateTime, user, message) {
+	const fs = require('fs');
+	fs.appendFileSync('logs/date-'+dateTime[0]+'.json', JSON.stringify({time:dateTime[1],user:user,text:message}) + "\n");
 }
 
-function yyyymmdd() { return new Date().toISOString().split('T')[0]; }
+function trackUser(user, message) {
+	let dateTime = dateTimeZ();
+	if (!(user in knownUsers)) knownUsers[user] = {};
+	knownUsers[user].lastseen = dateTime[0];
+
+	if (!('messages' in knownUsers[user])) knownUsers[user].messages = [];
+	knownUsers[user].messages.unshift({text:message, day:dateTime[0], time:dateTime[1]});
+	knownUsers[user].messages = knownUsers[user].messages.slice(0,3);
+
+	appendLogFile(dateTime, user, message)
+}
 
 
 function unknownUserCheck(user, message) {
@@ -41,8 +51,8 @@ function unknownUserDo(user, message) {
 }
 
 function knownUserCheck(user, message) {
-	if (user in knownUsers && 'lastseen' in knownUsers[user] && knownUsers[user].lastseen != yyyymmdd()) {
-		knownUsers[user] == yyyymmdd();
+	if (user in knownUsers && 'lastseen' in knownUsers[user] && knownUsers[user].lastseen != dateTimeZ()[0]) {
+		knownUsers[user] == dateTimeZ()[0];
 		return true;
 	}
 	return false;
@@ -67,7 +77,7 @@ function repeatingSelf(user, message) {
 		"messages" in knownUsers[user] && 
 		knownUsers[user].messages.length > 2 && 
 		message == knownUsers[user].messages[0].text &&
-		yyyymmdd() == knownUsers[user].messages[0].day &&
+		dateTimeZ()[0] == knownUsers[user].messages[0].day &&
 		message != knownUsers[user].messages[1].text);
 }
 

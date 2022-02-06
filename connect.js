@@ -1,28 +1,25 @@
 'use strict';
 
-const responseHandler = require('./responseHandlers.js');
-
-
-
-const xmpp = require('simple-xmpp'),
-      config = require('./config.json'),
-      Stanza = require('node-xmpp-client').Stanza;
-
+const responseHandler = require('./responseHandlers.js'),
+  xmpp = require('simple-xmpp'),
+  config = require('./config.json'),
+  Stanza = require('node-xmpp-client').Stanza;
 
 
 let queueTimer = null,
-    queue = [],
-    killed = false,
-    readyToRespond = false;
+  queue = [],
+  killed = false,
+  readyToRespond = false;
 
 
 let kill = (code) => {
   if (killed) { return; }
   killed = true;
+  readyToRespond = false;
   responseHandler.save();
   console.log('[INFO] Closing process');
   clearInterval(queueTimer);
-  setTimeout(() => process.exit(code), 5000);
+  setTimeout(() => process.exit(code), 3000);
 };
 
 function startQueueTimer() {
