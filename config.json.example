@@ -1,8 +1,9 @@
 {
     "jid": "1234567@chat.codingame.com",
     "password": "password",
+    "nickname": "your-name-here",
     "host": "chat.codingame.com",
     "port": 5222,
     "muc": "conference.codingame.com",
-    "groupchats": ["welcome", "testworld"]
+    "groupchats": ["world", "fr"]
 }

@@ -77,7 +77,7 @@ xmpp.on('online', data => {
 // });
 
 xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
-  console.log("[Group Received] " + from + " : '" + message + "'");
+  console.log( new Date().toISOString().slice(0,19) + " " + from + " " + message.replace(/\n/g,"\n    "));
   if (readyToRespond && from != config.nickname) {
     for (let handlerName of Object.keys(responseHandler.handlers)) {
       let handler = responseHandler.handlers[handlerName];
@@ -88,7 +88,7 @@ xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
       }
     }
   }
-  responseHandler.track(from,message);
+  if (readyToRespond) responseHandler.track(from,message);
 });
 
 xmpp.on('error', error => {
