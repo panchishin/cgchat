@@ -62,7 +62,7 @@ function knownUserDo(user, message) {
 
 function awardTacoCheck(user, message) {
 	const msg = message.split(/ +/);
-	if (user in knownUsers && !!message.toLowerCase().match(":taco:") && msg.length >= 2 && msg.length <= 7) {
+	if (user in knownUsers && !!message.toLowerCase().match(":taco:") && msg.length >= 2 && msg.length <= 5) {
 		for(let other of msg) {
 			if (other in knownUsers) {
 				return true;
@@ -74,7 +74,7 @@ function awardTacoCheck(user, message) {
 
 function awardTacoDo(user, message) {
 	if ("tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
-		return "sorry " + user + " but you can only award 1 taco a day";
+		return "sorry " + user + " but you can only award tacos once per day";
 	}
 
 	const words = message.split(/ +/).filter(x=>x!=":taco:");
