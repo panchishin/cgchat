@@ -1,6 +1,7 @@
 const fs = require('fs');
 
 function dateTimeZ() { return new Date().toISOString().split('T'); }
+function rot13(s) { return s.replace(/[a-zA-Z]/g,function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}); }
 
 let knownUsers = {};
 
@@ -96,7 +97,7 @@ function awardTacoDo(user, message) {
 }
 
 
-const badWords = "cunt fag faggot ass asshole fuck fucker fucking penis pussy balls shit turd twat fuckface badword".split(" ").map(x=>" "+x);
+const badWords = rot13('phag avttre avtre avtte snt snttbg nff nffubyr shpx shpxre shpxvat cravf chffl onyyf fuvg gheq gjng shpxsnpr onqjbeq').split(" ").map(x=>" "+x);
 function badLanguage(user, message) {
 	let padded = " " + message.toLowerCase().replace(/[^a-z ]/,"") + " "
 	for (let word of badWords) {

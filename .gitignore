@@ -4,6 +4,7 @@ config.json.wontonimo
 users.json
 private
 
+logs/date-*.json
 # Logs
 *.log
 npm-debug.log*
