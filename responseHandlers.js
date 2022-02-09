@@ -53,6 +53,7 @@ function unknownUserDo(user, message) {
 function lmgtfyCheck(user, message) {
 	let parts = message.split(" ");
 	return (parts.length >= 3 && 
+		user in knownUsers &&
 		('tacos' in knownUsers[user]) && 
 		knownUsers[user].tacos > 1 && 
 		parts[0] == "lmgtfy" &&
