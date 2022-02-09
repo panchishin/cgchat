@@ -50,6 +50,20 @@ function unknownUserDo(user, message) {
 	return "Welcome " + user + ", have't seen you before\nA friendly reminder to be respectful";
 }
 
+function lmgtfyCheck(user, message) {
+	let parts = message.split(" ");
+	return (parts.length >= 3 && 
+		('tacos' in knownUsers[user]) && 
+		knownUsers[user].tacos > 1 && 
+		parts[0] == "lmgtfy" &&
+		parts[1] in knownUsers);
+}
+
+function lmgtfyDo(user, message) {
+	let parts = message.split(" ");
+	return "hey " + parts[1] + " let me google that for you https://letmegooglethat.com/?q=" + parts.slice(2).join("+"); 
+}
+
 function knownUserCheck(user, message) {
 	if (user in knownUsers && 'lastseen' in knownUsers[user] && knownUsers[user].lastseen != dateTimeZ()[0]) {
 		knownUsers[user] == dateTimeZ()[0];
@@ -57,8 +71,11 @@ function knownUserCheck(user, message) {
 	}
 	return false;
 }
+
 function knownUserDo(user, message) {
-	return "Hey " + user + ", first time seeing you online today";
+	if (!('tacos' in knownUsers[user])) knownUsers[user].tacos = 0;
+	knownUsers[user].tacos += 1;
+	return "Hey " + user + ", here is a :taco: for loggin in today.  You now have " + knownUsers[user].tacos + " tacos";
 }
 
 function awardTacoCheck(user, message) {
@@ -129,8 +146,18 @@ exports.knownUsers = function() { return knownUsers; };
 exports.handlers = {
 	// "unknown user" : {
 	// 	check : unknownUserCheck,
-	// 	do : unknownUserDo
+	// 	do : unknownUserDo,
+	// 	dest : "tacos"
 	// },
+	"known user" : {
+		check : knownUserCheck,
+		do : knownUserDo,
+		dest : "taco"
+	},
+	"lmgtfy" : {
+		check : lmgtfyCheck,
+		do : lmgtfyDo
+	},
 	"naughty language" : {
 		check : badLanguage,
 		do : function(user, message) { return user + " be respectful and watch your language\nhttps://www.codingame.com/playgrounds/40701/help-center/code-of-conduct" }

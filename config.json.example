@@ -5,5 +5,5 @@
     "host": "chat.codingame.com",
     "port": 5222,
     "muc": "conference.codingame.com",
-    "groupchats": ["world", "fr"]
+    "groupchats": ["world", "taco"]
 }

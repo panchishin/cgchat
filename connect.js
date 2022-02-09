@@ -83,6 +83,9 @@ xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
       let handler = responseHandler.handlers[handlerName];
       if (handler.check(from, message)) {
         console.log("[Matched response] " + conference + " " + handlerName);
+        if ('dest' in handler) {
+          conference = handler.dest + '@' + config.muc;
+        }
         sendMessage(conference, "[automated] " + handler.do(from, message));
         break;
       }
