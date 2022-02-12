@@ -26,6 +26,16 @@ function addDefinitions(term, definition, user) {
 	}
 }
 
+function removeDefinitions(term, user) {
+	knownDefinitions[term.toLowerCase()].removed = true;
+	try {
+		console.log("[SAVING] started knownDefinitions");
+		fs.writeFileSync('knownDefinitions.json', JSON.stringify(knownDefinitions));
+		console.log("[SAVING] finished knownDefinitions");
+	} catch (error) {
+		console.error(err);
+	}
+}
 
 let knownUsers = {};
 
@@ -141,20 +151,47 @@ handlers.push({
 		const parts = message.split(/ +/);
 		const term = parts[1].toLowerCase().replace(/[^a-z:]/g,"");
 		const definition = parts.slice(3).join(" ");
-		if (term in knownDefinitions) { return "Sorry "+user+" but there is already a definition for that"}
+		if (term in knownDefinitions) { 
+			if ('removed' in knownDefinitions[term]) {
+				return "Sorry "+user+" but that term cannot be defined";
+			} else {
+				return "Sorry "+user+" but there is already a definition for that";
+			}
+		}
 
 		addDefinitions(term, definition, user);
 		knownUsers[user].tacos -= 5;
-		return "Thank you for spending 5 tacos to teach me about '" + term + "', thanks.  You now have " + knownUsers[user].tacos + " tacos";		
+		return "Thank you for spending 5 tacos to teach me about '" + term + "'. You now have " + knownUsers[user].tacos + " tacos";		
 	}
 })
 
+handlers.push({
+	name : "remove definition",
+	check : function (user, message) {
+		const parts = message.toLowerCase().split(/ +/);
+		return (parts.length == 3 && parts[0] == "antiwonto" && parts[1] == "undefine" && parts[2] in knownDefinitions && !('removed' in knownDefinitions[parts[2]]));
+	},
+	do : function(user, message) {
+		// must be a known user
+		if (!(user in knownUsers)) { return "Sorry "+user+" but I have to get to know you more before you can remove definitions"};
+		const tacos = 'tacos' in knownUsers[user] ? knownUsers[user].tacos : 0;
+		// must have at least 30 tacos
+		if (tacos < 50) { return "Sorry "+user+" but you need 50 tacos to remove a definition.  You have " + tacos + " tacos"};
+		// can't already be defined
+		const parts = message.toLowerCase().split(/ +/);
+		const term = parts[2];
+
+		removeDefinitions(term, user);
+		knownUsers[user].tacos -= 1;
+		return "Thank you for spending 1 tacos to remove that term.  It is removed forever.";
+	}
+})
 
 handlers.push({
 	name : "share definition",
 	check : function (user, message) {
 		const term = message.toLowerCase().replace(/[^a-z:]/g,"").replace(/whati?s?/,"");
-		return (term in knownDefinitions);
+		return (term in knownDefinitions && !('removed' in knownDefinitions[term]));
 	},
 	do : function(user, message) {
 		const term = message.toLowerCase().replace(/[^a-z:]/g,"").replace(/whati?s?/,"");
