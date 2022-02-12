@@ -31,12 +31,11 @@ function startQueueTimer() {
     } else {
       clearInterval(queueTimer)
     }
-  }, 4000);
+  }, 1000);
 }
 
 let sendMessage = function(conference, message) {
     try {
-      queue = [];
       let stanza = new Stanza('message', {
         to: conference,
         type: 'groupchat',
@@ -45,8 +44,6 @@ let sendMessage = function(conference, message) {
       stanza.c('body').t(message);  
 
       queue.push(stanza);
-      console.log("[QUEUED] " + message);
-
       startQueueTimer();
 
     } catch (e) {
@@ -68,7 +65,7 @@ xmpp.on('online', data => {
   setTimeout(()=> { 
     readyToRespond = true;
     console.log("[Online] enabled readyToRespond");
-  }, 5000);
+  }, 2000);
 });
 
 // xmpp.on('chat', function(from, message) {
@@ -79,13 +76,9 @@ xmpp.on('online', data => {
 xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
   console.log( new Date().toISOString().slice(0,19) + " " + from + " " + message.replace(/\n/g,"\n    "));
   if (readyToRespond && from != config.nickname) {
-    for (let handlerName of Object.keys(responseHandler.handlers)) {
-      let handler = responseHandler.handlers[handlerName];
+    for (let handler of responseHandler.handlers) {
+      const handlerName = handler.name;
       if (handler.check(from, message)) {
-        console.log("[Matched response] " + conference + " " + handlerName);
-        if ('dest' in handler) {
-          conference = handler.dest + '@' + config.muc;
-        }
         sendMessage(conference, "[automated] " + handler.do(from, message));
         break;
       }
