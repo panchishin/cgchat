@@ -133,7 +133,7 @@ handlers.push({
 	},
 	do : function(user, message) {
 		// must be a known user
-		if (!(user in knownUsers)) { return "Sorry "+user+" but I have to get to know you more before you can make definitiosn"};
+		if (!(user in knownUsers)) { return "Sorry "+user+" but I have to get to know you more before you can make definitions"};
 		const tacos = 'tacos' in knownUsers[user] ? knownUsers[user].tacos : 0;
 		// must have at least 30 tacos
 		if (tacos < 30) { return "Sorry "+user+" but you need 30 tacos to make definitions.  You have " + tacos + " tacos"};
@@ -208,14 +208,14 @@ handlers.push({
 	},
 	do : function awardTacoDo(user, message) {
 		if ("tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
-			return "sorry " + user + " but you can only award #taco once per day";
+			return "sorry " + user + " but you can only award tacos once per day";
 		}
 
 		const words = message.split(/ +/).filter(x=>x!=":taco:");
 		for(let other of words) {
 			if (other == user) {
 				knownUsers[user].tacoGiven = dateTimeZ()[0];
-				return "You used your #taco giving ability for the day to discover that you cannot give tacos to yourself";
+				return "You used your taco giving ability for the day to discover that you cannot give tacos to yourself";
 			}
 			if (other in knownUsers) {
 				if (!('tacos' in knownUsers[other])) knownUsers[other].tacos = 0;
@@ -223,10 +223,10 @@ handlers.push({
 				if (!('tacos' in knownUsers[user])) knownUsers[user].tacos = 0;
 				knownUsers[user].tacos += 1;
 				knownUsers[user].tacoGiven = dateTimeZ()[0];
-				return user + " has awarded " + other + " 10 #taco. " + other + " now has " + knownUsers[other].tacos + " taco. " + user + " now has " + knownUsers[user].tacos + " taco";
+				return user + " has awarded " + other + " 10 tacos. " + other + " now has " + knownUsers[other].tacos + " taco. " + user + " now has " + knownUsers[user].tacos + " taco";
 			}
 		}
-		return "sorry " + user + ", no users can be found to award that #taco";
+		return "sorry " + user + ", that user can not be found to award tacos to";
 	}
 });
 
