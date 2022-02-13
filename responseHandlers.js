@@ -195,7 +195,7 @@ handlers.push({
 	},
 	do : function(user, message) {
 		const term = message.toLowerCase().replace(/[^a-z:]/g,"").replace(/whati?s?/,"");
-		return "'" + knownDefinitions[term].term + "' was defined as '" + knownDefinitions[term].value + "' by " + knownDefinitions[term].user;
+		return "'" + knownDefinitions[term].term + "' was defined as ' " + knownDefinitions[term].value + " ' by " + knownDefinitions[term].user;
 	}
 })
 
@@ -244,7 +244,7 @@ handlers.push({
 		return false
 	},
 	do : function awardTacoDo(user, message) {
-		if ("tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
+		if (user in knownUsers && "tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
 			return "sorry " + user + " but you can only award tacos once per day";
 		}
 
