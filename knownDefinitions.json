@@ -1,1 +1,102 @@
-{"uttt":{"term":"UTTT","value":"Ultimate TicTacToe","user":"Wontonimo"},"coc":{"term":"CoC","value":"Clash of Code","user":"Wontonimo"},"ttt":{"term":"TTT","value":"TicTacToe","user":"Wontonimo"},"csb":{"term":"CSB","value":"Coders Strikes Back (aka Mad Pod Racing)","user":"Wontonimo"},"tt":{"term":"TT","value":"Transposition Tables, used in minimax and MCTS","user":"Wontonimo"},"mcts":{"term":"MCTS","value":"Monte Carlo Tree Search","user":"Wontonimo"},"cttt":{"term":"CTTT","value":"Counting Tic Tac Toe","user":"Wontonimo"},"ga":{"term":"GA","value":"Genetic Algorithm","user":"Wontonimo"},"tge":{"term":"TGE","value":"The Great Escape","user":"Wontonimo"},"recursion":{"term":"recursion","value":"recursion","user":"Wontonimo"},":taco:":{"term":":taco:","value":"A currency to some, sustenance for others","user":"Wontonimo"},"eulerschezahl":{"term":"eulerschezahl","value":"a noob","user":"Scarfield"},"mc":{"term":"mc","value":"Monte Carlo. Like MCTS except no tree. Much easier to implement but not as powerful","user":"Wontonimo"},"antiwonto":{"term":"antiwonto","value":"A bot, possibly assembled in Central America. Programming questionable","user":"Wontonimo"},"hi":{"term":"hi","value":"Greetings from Mrs.GloriaZindlebocker","user":"Mrs.GloriaZindlebocker"},"cgthibaud":{"term":"cgthibaud","value":"The worst so named community manager of all times.","user":"BlaiseEbuth"},"help":{"term":"help","value":"https://how-to-properly-ask-a-question.surge.sh","user":"Uljahn"},":upsidedown:":{"term":":upsidedown:","value":"ɥǝllo","user":"jacek"},":unamused:":{"term":":unamused:","value":"math","user":"jacek"}}
+{
+	"uttt": {
+		"term": "UTTT",
+		"value": "Ultimate TicTacToe",
+		"user": "Wontonimo"
+	},
+	"coc": {
+		"term": "CoC",
+		"value": "Clash of Code",
+		"user": "Wontonimo"
+	},
+	"ttt": {
+		"term": "TTT",
+		"value": "TicTacToe",
+		"user": "Wontonimo"
+	},
+	"csb": {
+		"term": "CSB",
+		"value": "Coders Strikes Back (aka Mad Pod Racing)",
+		"user": "Wontonimo"
+	},
+	"tt": {
+		"term": "TT",
+		"value": "Transposition Tables, used in minimax and MCTS",
+		"user": "Wontonimo"
+	},
+	"mcts": {
+		"term": "MCTS",
+		"value": "Monte Carlo Tree Search",
+		"user": "Wontonimo"
+	},
+	"cttt": {
+		"term": "CTTT",
+		"value": "Counting Tic Tac Toe",
+		"user": "Wontonimo"
+	},
+	"ga": {
+		"term": "GA",
+		"value": "Genetic Algorithm",
+		"user": "Wontonimo"
+	},
+	"tge": {
+		"term": "TGE",
+		"value": "The Great Escape",
+		"user": "Wontonimo"
+	},
+	":taco:": {
+		"term": ":taco:",
+		"value": "A currency to some, sustenance for others",
+		"user": "Wontonimo"
+	},
+	"mc": {
+		"term": "mc",
+		"value": "Monte Carlo. Like MCTS except no tree. Much easier to implement but not as powerful",
+		"user": "Wontonimo"
+	},
+	"antiwonto": {
+		"term": "antiwonto",
+		"value": "A bot, possibly assembled in Central America. Programming questionable",
+		"user": "Wontonimo"
+	},
+	"help": {
+		"term": "help",
+		"value": "https://how-to-properly-ask-a-question.surge.sh",
+		"user": "Uljahn"
+	},
+	":upside_down:": {
+		"term": ":upside_down:",
+		"value": "ɥǝllo",
+		"user": "jacek"
+	},
+	"[cg]": {
+		"term": "[cg]",
+		"value": "CodinGame",
+		"user": "Wontonimo"
+	},
+	"onitama": {
+		"term": "onitama",
+		"value": "Please someone make a PDF of this game so I can print it at home and play it",
+		"user": "Wontonimo"
+	},
+	"php": {
+		"term": "php",
+		"value": "A zombie walks into a brain store. On the shelves, a pound of C++ programmers' brain sells for $500, of Java programmers, $1000, and of PHP programmers, $1,000,000. The zombie gets confused and asks the store owner why PHP programmers' brain is so much more expensive. The owner says \"do you know how many PHP programmers I kill to get one pound of brain?\"",
+		"user": "Wontonimo"
+	},
+	"-3v": {
+		"term": "-3v",
+		"value": "A PID controller reference for mad pod racing. Check out https://w3.cs.jmu.edu/spragunr/CS354_F17/handouts/pid.pdf",
+		"user": "Wontonimo"
+	},
+	"sdk": {
+		"term": "sdk",
+		"value": "https://www.codingame.com/playgrounds/25775",
+		"user": "eulerscheZahl"
+	},
+	"tsp": {
+		"term": "tsp",
+		"value": "Traveling Sales Person",
+		"user": "Wontonimo"
+	}
+}
