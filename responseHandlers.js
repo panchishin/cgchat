@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const solver = require('./solver.js');
 
 function dateTimeZ() { return new Date().toISOString().split('T'); }
 function rot13(s) { return s.replace(/[a-zA-Z]/g,function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}); }
@@ -291,6 +292,25 @@ handlers.push({
 	},
 	do : function(user, message) {
 		return "Here are the commands I know : " + Object.keys(handlers).map(x=>handlers[x].name).join(", ");
+	}
+});
+
+
+handlers.push({
+	name : "solve equation",
+	check : function(user, message) {
+		if (solver.isQuestion(message)) {
+			try {
+				solver.solveQuestion(message);
+				return true;
+			} catch(e) {
+
+			}
+		};
+		return false;
+	},
+	do : function(user, message) {
+		return "x = " + solver.solveQuestion(message);
 	}
 });
 
