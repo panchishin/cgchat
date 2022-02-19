@@ -109,13 +109,15 @@ handlers.push({
 			user in knownUsers &&
 			('tacos' in knownUsers[user]) && 
 			knownUsers[user].tacos > 1 && 
-			parts[0] == "lmgtfy" &&
-			parts[1] in knownUsers);
+			parts[0] == "lmgtfy");
 	},
 	do : function lmgtfyDo(user, message) {
-			let parts = message.split(" ");
-			return "hey " + parts[1] + " let me google that for you https://letmegooglethat.com/?q=" + parts.slice(2).join("+"); 
+		let parts = message.split(" ");
+		if (!(parts[1] in knownUsers)) {
+			return "try 'lmgtfy [username] search'";
 		}
+		return "hey " + parts[1] + " let me google that for you https://letmegooglethat.com/?q=" + parts.slice(2).join("+"); 
+	}
 });
 
 function cleanDefinitionTerm(term) {
