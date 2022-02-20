@@ -1,5 +1,6 @@
 'use strict';
 
+const { last } = require('underscore');
 const responseHandler = require('./responseHandlers.js'),
   xmpp = require('simple-xmpp'),
   config = require('./config.json'),
@@ -51,6 +52,28 @@ let sendMessage = function(conference, message) {
     }
 }
 
+let lastResponseTime = Date.now();
+let lastResponseCount = 0;
+const MAX_BURST_RESPONSE = 10;
+
+function canRespond() {
+  if (lastResponseTime - Date.now() > 60*60*1000) {
+    lastResponseTime = Date.now();
+    lastResponseCount = 0;
+    return true;
+  }
+  return lastResponseCount < MAX_BURST_RESPONSE;
+}
+
+function updateResponse() {
+  while (lastResponseTime - Date.now() > 5*60*1000) {
+    lastResponseCount = Math.max(0, lastResponseCount-1);
+    lastResponseTime += 5*60*1000;
+  }
+  lastResponseCount++;
+  if (lastResponseCount >= MAX_BURST_RESPONSE) return " [sleeping]";
+  return "";
+}
 
 
 
@@ -68,18 +91,28 @@ xmpp.on('online', data => {
   }, 2000);
 });
 
-// xmpp.on('chat', function(from, message) {
-//   console.log("[Personal Received] " + from + " : '" + message + "'");
-//   //xmpp.send(from, 'echo: ' + message);
-// });
+xmpp.on('chat', function(from, message) {
+  console.log("[Personal Received] " + from + " : '" + message + "'");
+  for (let handler of responseHandler.handlers) {
+    const handlerName = handler.name;
+    if (handler.check(from, message)) {
+      xmpp.send(from, "[automated] " + handler.do(from, message));
+      break;
+    }
+    if (from in responseHandler.SUPER_USERS &&  handler.check(responseHandler.SUPER_USERS[from], message)) {
+      xmpp.send(from, "[automated] " + handler.do(responseHandler.SUPER_USERS[from], message));
+      break;
+    }
+  }
+});
 
 xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
   console.log( new Date().toISOString().slice(0,19) + " " + from + " " + message.replace(/\n/g,"\n    "));
-  if (readyToRespond && from != config.nickname) {
+  if (readyToRespond && from != config.nickname && canRespond()) {
     for (let handler of responseHandler.handlers) {
       const handlerName = handler.name;
       if (handler.check(from, message)) {
-        sendMessage(conference, "[automated] " + handler.do(from, message));
+        sendMessage(conference, "[automated] " + handler.do(from, message) + updateResponse());
         break;
       }
     }

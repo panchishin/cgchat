@@ -1,5 +1,10 @@
 'use strict';
 
+const SUPER_USERS = { '811622@chat.codingame.com' : 'Scarfield',
+  '4081634@chat.codingame.com' : 'Wontonimo',
+  '1540478@chat.codingame.com' : 'struct',
+  "3136787@chat.codingame.com" : "jacek" };
+
 const fs = require('fs');
 const solver = require('./solver.js');
 
@@ -124,14 +129,17 @@ function cleanDefinitionTerm(term) {
 	return term.toLowerCase().replace(/[^\-\+0-9a-z:_\]\[]/g,"")
 }
 
-/*
+
 handlers.push({
 	name : "teach definition",
 	check : function (user, message) {
+		if (!(user in SUPER_USERS)) return false;
 		const parts = message.split(/ +/);
 		return (parts.length >= 4 && parts[2] == "=" && parts[0].toLowerCase() == "antiwonto");
 	},
 	do : function(user, message) {
+		user = SUPER_USERS[user];
+		
 		// must be a known user
 		if (!(user in knownUsers)) { return "Sorry "+user+" but I have to get to know you more before you can make definitions"};
 		const tacos = 'tacos' in knownUsers[user] ? knownUsers[user].tacos : 0;
@@ -162,10 +170,12 @@ handlers.push({
 handlers.push({
 	name : "remove definition",
 	check : function (user, message) {
+		if (!(user in SUPER_USERS)) return false;
 		const parts = message.toLowerCase().split(/ +/);
 		return (parts.length == 3 && parts[0] == "antiwonto" && parts[1] == "undefine" && parts[2] in knownDefinitions && !('removed' in knownDefinitions[parts[2]]));
 	},
 	do : function(user, message) {
+		user = SUPER_USERS[user];
 
 		// must be a known user
 		if (!(user in knownUsers)) { return "Sorry "+user+" but I have to get to know you more before you can remove definitions"};
@@ -187,18 +197,15 @@ handlers.push({
 		return "Thank you for spending 1 tacos to remove that term.  It is removed forever.";
 	}
 })
-*/
+
 
 handlers.push({
 	name : "share definition",
 	check : function (user, message) {
 		const term = cleanDefinitionTerm(message).replace(/whati?s?/,"");
-		return ((message in knownUsers) || (term in knownDefinitions && !('removed' in knownDefinitions[term])));
+		return (term in knownDefinitions && !('removed' in knownDefinitions[term]));
 	},
 	do : function(user, message) {
-		if (message in knownUsers) {
-			return "That's a user!  Did you know that they have " + knownUsers[message].tacos + " tacos?";
-		}
 		const term = cleanDefinitionTerm(message).replace(/whati?s?/,"");
 		return "'" + knownDefinitions[term].term + "' was defined as ' " + knownDefinitions[term].value + " ' by " + knownDefinitions[term].user;
 	}
@@ -319,6 +326,7 @@ handlers.push({
 
 loadKnownUsers();
 
+exports.SUPER_USERS = SUPER_USERS;
 exports.save = saveKnownUsers;
 exports.track = trackUser;
 exports.knownUsers = function() { return knownUsers; };
