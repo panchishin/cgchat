@@ -1,7 +1,6 @@
 config.json
 config.json.antiwonto
 config.json.wontonimo
-users.json
 private
 
 logs/date-*.json
