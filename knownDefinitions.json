@@ -112,7 +112,8 @@
   "hi": {
     "term": "hi",
     "value": "A common salutation for those who are short of words",
-    "user": "Wontonimo"
+    "user": "Wontonimo",
+    "removed": true
   },
   "multi": {
     "term": "multi",
@@ -123,5 +124,15 @@
     "term": "bot",
     "value": "Automaton2000",
     "user": "jacek"
+  },
+  "test": {
+    "term": "test",
+    "value": "this is a test",
+    "user": "struct"
+  },
+  "stc": {
+    "term": "stc",
+    "value": "Smash The Code https://www.codingame.com/multiplayer/bot-programming/smash-the-code",
+    "user": "Wontonimo"
   }
 }

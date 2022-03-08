@@ -57,22 +57,15 @@ let lastResponseCount = 0;
 const MAX_BURST_RESPONSE = 10;
 
 function canRespond() {
-  if (lastResponseTime - Date.now() > 60*60*1000) {
-    lastResponseTime = Date.now();
+  if (lastResponseTime - Date.now() > 5*60*1000) {
     lastResponseCount = 0;
-    return true;
+    lastResponseTime = Date.now();
   }
   return lastResponseCount < MAX_BURST_RESPONSE;
 }
 
 function updateResponse() {
-  while (lastResponseTime - Date.now() > 5*60*1000) {
-    lastResponseCount = Math.max(0, lastResponseCount-1);
-    lastResponseTime += 5*60*1000;
-  }
-  lastResponseCount++;
-  if (lastResponseCount >= MAX_BURST_RESPONSE) return " [sleeping]";
-  return "";
+  return (++lastResponseCount >= MAX_BURST_RESPONSE) ? " [sleeping]" : "";
 }
 
 
@@ -89,6 +82,7 @@ xmpp.on('online', data => {
     readyToRespond = true;
     console.log("[Online] enabled readyToRespond");
   }, 2000);
+
 });
 
 xmpp.on('chat', function(from, message) {
@@ -96,11 +90,11 @@ xmpp.on('chat', function(from, message) {
   for (let handler of responseHandler.handlers) {
     const handlerName = handler.name;
     if (handler.check(from, message)) {
-      xmpp.send(from, "[automated] " + handler.do(from, message));
+      xmpp.send(from, "[auto] " + handler.do(from, message));
       break;
     }
     if (from in responseHandler.SUPER_USERS &&  handler.check(responseHandler.SUPER_USERS[from], message)) {
-      xmpp.send(from, "[automated] " + handler.do(responseHandler.SUPER_USERS[from], message));
+      xmpp.send(from, "[auto] " + handler.do(responseHandler.SUPER_USERS[from], message));
       break;
     }
   }
@@ -108,11 +102,11 @@ xmpp.on('chat', function(from, message) {
 
 xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
   console.log( new Date().toISOString().slice(0,19) + " " + from + " " + message.replace(/\n/g,"\n    "));
-  if (readyToRespond && from != config.nickname && canRespond()) {
+  if (readyToRespond && from != config.nicknam) {
     for (let handler of responseHandler.handlers) {
       const handlerName = handler.name;
       if (handler.check(from, message)) {
-        sendMessage(conference, "[automated] " + handler.do(from, message) + updateResponse());
+        sendMessage(conference, "[auto] " + handler.do(from, message) );
         break;
       }
     }
@@ -135,7 +129,6 @@ xmpp.connect({
   host: config.host,
   port: config.port
 });
-
 
 
 process.on('exit', kill);

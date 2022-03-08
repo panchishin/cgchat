@@ -11,6 +11,7 @@ const solver = require('./solver.js');
 function dateTimeZ() { return new Date().toISOString().split('T'); }
 function rot13(s) { return s.replace(/[a-zA-Z]/g,function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}); }
 
+
 let knownDefinitions = {};
 
 function loadKnownDefinitions() {
@@ -48,10 +49,22 @@ let knownUsers = {};
 function loadKnownUsers() {
 	fs.readFile('users.json', 'utf-8', (err, data) => {
 		if (err) { throw err; }
+		let badUsers = [];
 		knownUsers = JSON.parse(data.toString());
-		for(let user of Object.keys(knownUsers).map(x=>knownUsers[x])) {
-			if ('messages' in user) delete user['messages'];
+		for(let userName of Object.keys(knownUsers)) {
+			let user = knownUsers[userName];
+			// if ('messages' in user) delete user['messages'];
+			if ('tacos' in user) {
+				if (isNaN(user.tacos)) {
+					user.tacos = 1;
+					console.log("Updating " + userName + " to have " + user.tacos + " tacos")
+				}
+			} else {
+				user.tacos = 1;
+				console.log("Updating " + userName + " to have " + user.tacos + " tacos")
+			}
 		}
+		// for(let userName of badUsers) delete knownUsers[userName];
 	});
 }
 
@@ -72,8 +85,7 @@ function appendLogFile(dateTime, user, message) {
 
 function trackUser(user, message) {
 	let dateTime = dateTimeZ();
-	if (!(user in knownUsers)) knownUsers[user] = {};
-	knownUsers[user].lastseen = dateTime[0];
+	if (!(user in knownUsers)) knownUsers[user] = {tacos: 0, lastseen: dateTime[0], tacoGiven: ""};
 	
 	if (!('tacoGiven' in knownUsers[user])) knownUsers[user].tacoGiven = "";
 
@@ -101,9 +113,25 @@ handlers.push({
 });
 
 handlers.push({
-	name : "redirect clash of code",
-	check : function(user, message) { return message.indexOf("https://www.codingame.com/clashofcode/clash") >= 0 && message.indexOf("report") == -1 },
-	do : function(user, message) { return "hey " + user + ", dont paste those links here.  Use the channel #clash" }
+	searches : {
+		"exec(bytes": "that looks like python golf compression.  It's legit, and acceptable to use.  You may be interested in this tool https://clemg.github.io/pythongolfer/",
+		"golf compression":"talking aboutt golf Compression? ruby like eval'杓敶恿...栅'.encode(‘UCS-2BE’).b , js lie eval(’’+Buffer('杓敶恿...栅','ucs2') , python like exec(bytes('杓敶恿...栅','u16')[2:])",
+		"https://www.codingame.com/clashofcode/clash": "dont paste those links here.  Use the channel #clash",
+		"teach me": "looking for some intro tutorials on programming?  This isn't the place probably.  Try codecademy.com , 'The Coding Train' on youtube, or first levels in codewars.com"
+	},
+	name : "common phrase responses",
+	check : function(user, message) { 
+		for(let key of Object.keys(this.searches)){
+			if (message.indexOf(key) >= 0) return 1;
+		}
+		return 0;
+	},
+	do : function(user, message) { 
+		for(let key of Object.keys(this.searches)){
+			if (message.indexOf(key) >= 0) return "hey " + user + " " + this.searches[key];
+		}
+		return "woops, I'm confused";
+	}
 });
 
 handlers.push({
@@ -215,7 +243,7 @@ handlers.push({
 
 handlers.push({
 	quietSince : Date.now(),
-	quietCooldown : 60 * 60 * 1000, // 60 minutes
+	quietCooldown : 30 * 60 * 1000, // 60 minutes
 	name : "welcome known user",
 	check : function knownUserCheck(user, message) {
 		const quiet = (Date.now() - this.quietSince > this.quietCooldown);
@@ -256,8 +284,16 @@ handlers.push({
 		return false
 	},
 	do : function awardTacoDo(user, message) {
-		if (user in knownUsers && "tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
+		if (!(user in knownUsers)) {
+			trackUser(user, message);
+		}
+
+		if ("tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
 			return "sorry " + user + " but you can only award tacos once per day";
+		}
+
+		if (knownUsers[user].tacos < 3) {
+			return "Sorry " + user + " but you need 3 tacos to give tacos.  You have " + knownUsers[user].tacos + " now.  Get someone to give you more tacos first"
 		}
 
 		const words = message.split(/ +/).filter(x=>x!=":taco:");
@@ -267,15 +303,13 @@ handlers.push({
 				return "You used your taco giving ability for the day to discover that you cannot give tacos to yourself";
 			}
 			if (other in knownUsers) {
-				if (!(user in knownUsers)) {
-					trackUser(user, message);
-				}
 				if (!('tacos' in knownUsers[other])) knownUsers[other].tacos = 0;
-				knownUsers[other].tacos += 10;
+				let award = Math.min(10, knownUsers[other].tacos+1, knownUsers[user].tacos);
+				knownUsers[other].tacos += award;
 				if (!('tacos' in knownUsers[user])) knownUsers[user].tacos = 0;
 				knownUsers[user].tacos += 1;
 				knownUsers[user].tacoGiven = dateTimeZ()[0];
-				return user + " has awarded " + other + " 10 tacos. " + other + " now has " + knownUsers[other].tacos + " taco. " + user + " now has " + knownUsers[user].tacos + " taco";
+				return user + " has awarded " + other + " "+award+" tacos. " + other + " now has " + knownUsers[other].tacos + " taco. " + user + " now has " + knownUsers[user].tacos + " taco";
 			}
 		}
 		return "sorry " + user + ", that user can not be found to award tacos to";
