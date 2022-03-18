@@ -235,7 +235,7 @@ handlers.push({
 	},
 	do : function(user, message) {
 		const term = cleanDefinitionTerm(message).replace(/whati?s?/,"");
-		return "'" + knownDefinitions[term].term + "' was defined as ' " + knownDefinitions[term].value + " ' by " + knownDefinitions[term].user;
+		return "'" + knownDefinitions[term].term + "' was defined as ' " + knownDefinitions[term].value + " '";
 	}
 })
 
@@ -261,60 +261,6 @@ handlers.push({
 	}
 });
 
-handlers.push({
-	name : "say hi",
-	check : function(user, message) { 
-		let m = " "+message.toLowerCase() + " ";
-		return !!m.match("[^a-z0-1](yo|hi|hey|hello)[^a-z0-1]") && !!m.match("[^a-z0-1]antiwonto") && m.length < 30;
-	},
-	do : function(user, message) { return "hey " + user +". I'm a bot :robot:" }
-});
-
-handlers.push({
-	name : "award taco",
-	check : function awardTacoCheck(user, message) {
-		const msg = message.split(/ +/);
-		if (!!message.toLowerCase().match(":taco:") && msg.length >= 2 && msg.length <= 5) {
-			for(let other of msg) {
-				if (other in knownUsers) {
-					return true;
-				}
-			}
-		}
-		return false
-	},
-	do : function awardTacoDo(user, message) {
-		if (!(user in knownUsers)) {
-			trackUser(user, message);
-		}
-
-		if ("tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
-			return "sorry " + user + " but you can only award tacos once per day";
-		}
-
-		if (knownUsers[user].tacos < 3) {
-			return "Sorry " + user + " but you need 3 tacos to give tacos.  You have " + knownUsers[user].tacos + " now.  Get someone to give you more tacos first"
-		}
-
-		const words = message.split(/ +/).filter(x=>x!=":taco:");
-		for(let other of words) {
-			if (other == user) {
-				knownUsers[user].tacoGiven = dateTimeZ()[0];
-				return "You used your taco giving ability for the day to discover that you cannot give tacos to yourself";
-			}
-			if (other in knownUsers) {
-				if (!('tacos' in knownUsers[other])) knownUsers[other].tacos = 0;
-				let award = Math.min(10, knownUsers[other].tacos+1, knownUsers[user].tacos);
-				knownUsers[other].tacos += award;
-				if (!('tacos' in knownUsers[user])) knownUsers[user].tacos = 0;
-				knownUsers[user].tacos += 1;
-				knownUsers[user].tacoGiven = dateTimeZ()[0];
-				return user + " has awarded " + other + " "+award+" tacos. " + other + " now has " + knownUsers[other].tacos + " taco. " + user + " now has " + knownUsers[user].tacos + " taco";
-			}
-		}
-		return "sorry " + user + ", that user can not be found to award tacos to";
-	}
-});
 
 handlers.push({
 	lastUnknownUserTime : Date.now(),
@@ -355,6 +301,177 @@ handlers.push({
 	do : function(user, message) {
 		return "x = " + solver.solveQuestion(message);
 	}
+});
+
+function namedUser(message) {
+	const msg = message.split(/ +/);
+	for(let other of msg) {
+		if (other in knownUsers) {
+			return other;
+		}
+	}
+	return "";
+}
+
+handlers.push({
+	name : "award taco",
+	check : function awardTacoCheck(user, message) {
+		const msg = message.split(/ +/);
+		if (!!message.toLowerCase().match(":taco:") && msg.length >= 2 && msg.length <= 5) {
+			return namedUser(message) != "";
+		}
+		return false
+	},
+	do : function awardTacoDo(user, message) {
+		if (!(user in knownUsers)) {
+			trackUser(user, message);
+		}
+
+		if ("tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
+			return "sorry " + user + " but you can only award tacos once per day";
+		}
+
+		if (knownUsers[user].tacos < 3) {
+			return "Sorry " + user + " but you need 3 tacos to give tacos.  You have " + knownUsers[user].tacos + " now.  Get someone to give you more tacos first"
+		}
+
+		let other = namedUser(message);
+		if (other == user) {
+			knownUsers[user].tacoGiven = dateTimeZ()[0];
+			return "You used your taco giving ability for the day to discover that you cannot give tacos to yourself";
+		}
+		if (other in knownUsers) {
+			if (!('tacos' in knownUsers[other])) knownUsers[other].tacos = 0;
+			let award = Math.min(10, knownUsers[other].tacos+1, knownUsers[user].tacos);
+			knownUsers[other].tacos += award;
+			if (!('tacos' in knownUsers[user])) knownUsers[user].tacos = 0;
+			knownUsers[user].tacos += 1;
+			knownUsers[user].tacoGiven = dateTimeZ()[0];
+			return user + " has awarded " + other + " "+award+" tacos. " + other + " now has " + knownUsers[other].tacos + " taco. " + user + " now has " + knownUsers[user].tacos + " taco";
+		}
+		return "sorry " + user + ", that user can not be found to award tacos to";
+	}
+});
+
+let tacos_on_floor = 0;
+let last_to_take_tacos = "";
+
+handlers.push({
+	name : "throw tacos",
+	check : function(user, message) { 
+		let m = " "+message.toLowerCase() + " ";
+		return !!m.match("[^a-z0-1]throw[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30 && 'tacos' in knownUsers[user] && knownUsers[user].tacos > 0;
+	},
+	do : function(user, message) {
+		let thrown_tacos = Math.min(knownUsers[user].tacos,10);
+		knownUsers[user].tacos -= thrown_tacos;
+		tacos_on_floor += thrown_tacos;
+		return user + " has thrown " + thrown_tacos + " :taco:s on the floor for the taking!";
+	}
+});
+
+
+let attributes = ['Strength','Dexterity','Intelligence','Style','Charm','Swag'];
+function randAttribute() {
+	return attributes[Math.floor(Math.random()*attributes.length)];
+}
+
+
+handlers.push({
+	name : "eat tacos",
+	check : function(user, message) { 
+		let m = " "+message.toLowerCase() + " ";
+		return !!m.match("[^a-z0-1]eat[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30 && 'tacos' in knownUsers[user] && knownUsers[user].tacos > 0;
+	},
+	do : function(user, message) {
+		let eaten_tacos = Math.min(knownUsers[user].tacos,10);
+		knownUsers[user].tacos -= eaten_tacos;
+		let attribute = randAttribute();
+		if (!(attribute in knownUsers[user])) { knownUsers[user][attribute] = 0}
+		knownUsers[user][attribute] += 1;
+		return user + " has eaten " + eaten_tacos + " :taco: and your " + attribute + " is now " + knownUsers[user][attribute] +".  You have " + knownUsers[user].tacos + " left";
+	}
+});
+
+handlers.push({
+	name : "shakedown tacos",
+	check : function(user, message) { 
+		let m = " "+message.toLowerCase() + " ";
+		return !!m.match("[^a-z0-1]shakedown[^a-z0-1]") && namedUser(message) != "";
+	},
+	do : function(user, message) {
+		// need to use tacos to shake other and other needs tacos
+		if (!('tacos' in knownUsers[user])) return "you need to have :taco:s to do a shakedown";
+		if (knownUsers[user].tacos < 3) return "you need at least 3 :taco:s to do a shakedown";
+
+		let other = namedUser(message);
+		if (other == "") return "name another user in your shakedown";
+		if (!('tacos' in knownUsers[other])) return other + " needs to have :taco:s to do a shakedown";
+		if (knownUsers[other].tacos < 100) return other + " needs at least 100 :taco:s to do a shakedown";
+
+		// compare some stat
+		let attribute = randAttribute();
+		let user_val = attribute in knownUsers[user] ? knownUsers[user][attribute] : 0;
+		let other_val = attribute in knownUsers[other] ? knownUsers[other][attribute] : 0;
+
+		// calculate fallout
+		if (user_val+Math.random()*4 > other_val+Math.random()*4) {
+			knownUsers[other].tacos -= 10;
+			tacos_on_floor += 9;
+			knownUsers[user].tacos -= 1;
+			
+			if (user_val > other_val) {
+				return "Using your superior " + attribute + " of " + user_val + " you shake 10 :taco:s off of " + other + ".  9 fall on the floor, 1 got crushed, and you lost 1";
+			} else {
+				return "Although your " + attribute + " of " + user_val + " is inferior you luck out and shake 10 :taco:s off of " + other + ".  9 fall on the floor, 1 got crushed, and you lost 1";
+			}
+		} else {
+			tacos_on_floor += 2;
+			knownUsers[user].tacos -= 3;
+			
+			if (user_val > other_val) {
+				return "Using your superior " + attribute + " of " + user_val + " you still fail, dropping 3 tacos and crushing 1";
+			} else {
+				return "Your " + attribute + " of " + user_val + " is inferior and you drop 3 tacos and 1 got crushed";
+			}
+		}
+	}
+});
+
+
+
+handlers.push({
+	name : "take tacos",
+	check : function(user, message) { 
+		let m = " "+message.toLowerCase() + " ";
+		return !!m.match("[^a-z0-1]take[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30;
+	},
+	do : function(user, message) {
+		if (tacos_on_floor <= 0) {
+			return "aww, there are no tacos to take";
+		}
+		if (last_to_take_tacos == user) {
+			return "sorry " + user + " but you have to give someone else a turn";
+		}
+		let taken_tacos = Math.max(Math.round(tacos_on_floor/2),1);
+		if (!(user in knownUsers)) {
+			trackUser(user, message);
+		}
+		knownUsers[user].tacos += taken_tacos;
+		tacos_on_floor -= taken_tacos;
+		last_to_take_tacos = user;
+		return user + " has taken " + taken_tacos + " :taco:s off the floor and now has " + knownUsers[user].tacos + ".  There are " + tacos_on_floor + " left";
+	}
+});
+
+
+handlers.push({
+	name : "say hi",
+	check : function(user, message) { 
+		let m = " "+message.toLowerCase() + " ";
+		return !!m.match("[^a-z0-1](yo|hi|hey|hello)[^a-z0-1]") && !!m.match("[^a-z0-1]antiwonto") && m.length < 30;
+	},
+	do : function(user, message) { return "hey " + user +". I'm a bot :robot:" }
 });
 
 
