@@ -365,8 +365,8 @@ handlers.push({
 	do : function(user, message) {
 		let thrown_tacos = Math.min(knownUsers[user].tacos,10);
 		knownUsers[user].tacos -= thrown_tacos;
-		tacos_on_floor += thrown_tacos;
-		return user + " has thrown " + thrown_tacos + " :taco:s on the floor for the taking!";
+		tacos_on_floor += thrown_tacos - 1;
+		return user + " has thrown " + thrown_tacos + " :taco:s on the floor for the taking but 1 was eaten by a software bugs!";
 	}
 });
 
@@ -381,15 +381,35 @@ handlers.push({
 	name : "eat tacos",
 	check : function(user, message) { 
 		let m = " "+message.toLowerCase() + " ";
-		return !!m.match("[^a-z0-1]eat[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30 && 'tacos' in knownUsers[user] && knownUsers[user].tacos > 0;
+		return !!m.match("[^a-z0-1]eat[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30 && user in knownUsers && 'tacos' in knownUsers[user] && knownUsers[user].tacos > 0;
 	},
 	do : function(user, message) {
+		if (knownUsers[user].tacos < 10) {
+			return "you need at least 10 tacos to make a proper meal";
+		}
 		let eaten_tacos = Math.min(knownUsers[user].tacos,10);
 		knownUsers[user].tacos -= eaten_tacos;
 		let attribute = randAttribute();
 		if (!(attribute in knownUsers[user])) { knownUsers[user][attribute] = 0}
 		knownUsers[user][attribute] += 1;
+		last_to_take_tacos = user;
 		return user + " has eaten " + eaten_tacos + " :taco: and your " + attribute + " is now " + knownUsers[user][attribute] +".  You have " + knownUsers[user].tacos + " left";
+	}
+});
+
+handlers.push({
+	name : "huntdown tacos",
+	check : function(user, message) { 
+		let m = message.toLowerCase();
+		return !!m.match("^huntdown.*taco");
+	},
+	do : function(user, message) {
+		for(let name of Object.keys(knownUsers)) {
+			if ('tacos' in knownUsers[name] && knownUsers[name].tacos >= 50) {
+				return "Looks like " + name + " has " + knownUsers[name].tacos + " tacos";
+			}
+		}
+		return "Cant find anyone with enough tacos";
 	}
 });
 
@@ -407,7 +427,7 @@ handlers.push({
 		let other = namedUser(message);
 		if (other == "") return "name another user in your shakedown";
 		if (!('tacos' in knownUsers[other])) return other + " needs to have :taco:s to do a shakedown";
-		if (knownUsers[other].tacos < 100) return other + " needs at least 100 :taco:s to do a shakedown";
+		if (knownUsers[other].tacos < 50) return other + " needs at least 50 :taco:s to do a shakedown";
 
 		// compare some stat
 		let attribute = randAttribute();
@@ -415,10 +435,10 @@ handlers.push({
 		let other_val = attribute in knownUsers[other] ? knownUsers[other][attribute] : 0;
 
 		// calculate fallout
+		last_to_take_tacos = user;
 		if (user_val+Math.random()*4 > other_val+Math.random()*4) {
 			knownUsers[other].tacos -= 10;
 			tacos_on_floor += 9;
-			knownUsers[user].tacos -= 1;
 			
 			if (user_val > other_val) {
 				return "Using your superior " + attribute + " of " + user_val + " you shake 10 :taco:s off of " + other + ".  9 fall on the floor, 1 got crushed, and you lost 1";
@@ -453,7 +473,10 @@ handlers.push({
 		if (last_to_take_tacos == user) {
 			return "sorry " + user + " but you have to give someone else a turn";
 		}
-		let taken_tacos = Math.max(Math.round(tacos_on_floor/2),1);
+		if (!('tacos' in knownUsers[user])) {
+			knownUsers[user].tacos = 0;
+		}
+		let taken_tacos = Math.min(knownUsers[user].tacos+1, Math.max(Math.round(tacos_on_floor/2), Math.min(2, tacos_on_floor)));
 		if (!(user in knownUsers)) {
 			trackUser(user, message);
 		}

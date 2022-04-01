@@ -102,7 +102,7 @@ xmpp.on('chat', function(from, message) {
 
 xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
   console.log( new Date().toISOString().slice(0,19) + " " + from + " " + message.replace(/\n/g,"\n    "));
-  if (readyToRespond && from != config.nicknam) {
+  if (readyToRespond && from != config.nickname) {
     for (let handler of responseHandler.handlers) {
       const handlerName = handler.name;
       if (handler.check(from, message)) {
