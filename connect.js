@@ -105,8 +105,8 @@ xmpp.on('groupchat', (conference, from, message, stamp, delay) => {
   if (readyToRespond && from != config.nickname) {
     for (let handler of responseHandler.handlers) {
       const handlerName = handler.name;
-      if (handler.check(from, message)) {
-        sendMessage(conference, "[auto] " + handler.do(from, message) );
+      if (handler.check(from, message, conference)) {
+        sendMessage(conference, "[auto] " + handler.do(from, message, conference) );
         break;
       }
     }

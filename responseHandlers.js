@@ -97,8 +97,8 @@ let handlers = [];
 
 handlers.push({
 	name : "identify bad words",
-	badwords : rot13('phag avttre avtre avtte snt snttbg nff nffubyr shpx shpxre shpxvat cravf chffl onyyf fuvg gheq gjng shpxsnpr onqjbeq').split(" ").map(x=>" "+x),
-	check : function badLanguage(user, message) {
+	badwords : rot13('grfgvpyrf phag avttre avtre avtte snt snttbg nff nffubyr shpx shpxre shpxvat cravf chffl fuvg gheq gjng shpxsnpr').split(" ").map(x=>" "+x),
+	check : function (user, message, room) {
 		let padded = " " + message.toLowerCase().replace(/[^a-z ]/,"") + " "
 		for (let word of this.badwords) {
 			if (padded.indexOf(word + " ") >= 0) return true;
@@ -107,7 +107,7 @@ handlers.push({
 		}
 		return false;
 	},
-	do : function(user, message) { 
+	do : function(user, message, room) { 
 		return user + " be respectful and watch your language\nhttps://www.codingame.com/playgrounds/40701/help-center/code-of-conduct"
 	}
 });
@@ -120,13 +120,13 @@ handlers.push({
 		"teach me": "looking for some intro tutorials on programming?  This isn't the place probably.  Try codecademy.com , 'The Coding Train' on youtube, or first levels in codewars.com"
 	},
 	name : "common phrase responses",
-	check : function(user, message) { 
+	check : function(user, message, room) { 
 		for(let key of Object.keys(this.searches)){
 			if (message.indexOf(key) >= 0) return 1;
 		}
 		return 0;
 	},
-	do : function(user, message) { 
+	do : function(user, message, room) { 
 		for(let key of Object.keys(this.searches)){
 			if (message.indexOf(key) >= 0) return "hey " + user + " " + this.searches[key];
 		}
@@ -136,7 +136,7 @@ handlers.push({
 
 handlers.push({
 	name : "lmgtfy",
-	check : function lmgtfyCheck(user, message) {
+	check : function lmgtfyCheck(user, message, room) {
 		let parts = message.split(" ");
 		return (parts.length >= 3 && 
 			user in knownUsers &&
@@ -144,7 +144,7 @@ handlers.push({
 			knownUsers[user].tacos > 1 && 
 			parts[0] == "lmgtfy");
 	},
-	do : function lmgtfyDo(user, message) {
+	do : function lmgtfyDo(user, message, room) {
 		let parts = message.split(" ");
 		if (!(parts[1] in knownUsers)) {
 			return "try 'lmgtfy [username] search'";
@@ -160,12 +160,12 @@ function cleanDefinitionTerm(term) {
 
 handlers.push({
 	name : "teach definition",
-	check : function (user, message) {
+	check : function (user, message, room) {
 		if (!(user in SUPER_USERS)) return false;
 		const parts = message.split(/ +/);
 		return (parts.length >= 4 && parts[2] == "=" && parts[0].toLowerCase() == "antiwonto");
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
 		user = SUPER_USERS[user];
 		
 		// must be a known user
@@ -197,12 +197,12 @@ handlers.push({
 
 handlers.push({
 	name : "remove definition",
-	check : function (user, message) {
+	check : function (user, message, room) {
 		if (!(user in SUPER_USERS)) return false;
 		const parts = message.toLowerCase().split(/ +/);
 		return (parts.length == 3 && parts[0] == "antiwonto" && parts[1] == "undefine" && parts[2] in knownDefinitions && !('removed' in knownDefinitions[parts[2]]));
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
 		user = SUPER_USERS[user];
 
 		// must be a known user
@@ -229,11 +229,11 @@ handlers.push({
 
 handlers.push({
 	name : "share definition",
-	check : function (user, message) {
+	check : function (user, message, room) {
 		const term = cleanDefinitionTerm(message).replace(/whati?s?/,"");
 		return (term in knownDefinitions && !('removed' in knownDefinitions[term]));
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
 		const term = cleanDefinitionTerm(message).replace(/whati?s?/,"");
 		return "'" + knownDefinitions[term].term + "' was defined as ' " + knownDefinitions[term].value + " '";
 	}
@@ -245,7 +245,7 @@ handlers.push({
 	quietSince : Date.now(),
 	quietCooldown : 30 * 60 * 1000, // 60 minutes
 	name : "welcome known user",
-	check : function knownUserCheck(user, message) {
+	check : function knownUserCheck(user, message, room) {
 		const quiet = (Date.now() - this.quietSince > this.quietCooldown);
 		this.quietSince = Date.now();
 		if (quiet && user in knownUsers && 'lastseen' in knownUsers[user] && knownUsers[user].lastseen != dateTimeZ()[0]) {
@@ -254,7 +254,7 @@ handlers.push({
 		}
 		return false;
 	},
-	do : function knownUserDo(user, message) {
+	do : function knownUserDo(user, message, room) {
 		if (!('tacos' in knownUsers[user])) knownUsers[user].tacos = 0;
 		knownUsers[user].tacos += 1;
 		return "Hey " + user + ", here is a :taco: for loggin in today while it is quiet.  You now have " + knownUsers[user].tacos + " tacos";
@@ -267,7 +267,7 @@ handlers.push({
 	lastUnknownUserCooldown : 30 * 60 * 1000, // 30 minutes
 	name : "welcome new user",
 	check : (user, message) => (!(user in knownUsers) && (Date.now() - this.lastUnknownUserTime > this.lastUnknownUserCooldown)),
-	do : function(user, message) {
+	do : function(user, message, room) {
 		this.lastUnknownUserTime = Date.now();
 		return "Welcome " + user + ", have't seen you before\nA friendly reminder to be respectful";
 	}
@@ -275,11 +275,11 @@ handlers.push({
 
 handlers.push({
 	name : "what can the bot do",
-	check : function(user, message) {
+	check : function(user, message, room) {
 		message = message.toLowerCase();
 		return message.indexOf("what") >= 0 && message.indexOf("antiwonto") >= 0 && message.indexOf("do") >= 0 && message.length < 50;
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
 		return "Here are the commands I know : " + Object.keys(handlers).map(x=>handlers[x].name).join(", ");
 	}
 });
@@ -287,7 +287,7 @@ handlers.push({
 
 handlers.push({
 	name : "solve equation",
-	check : function(user, message) {
+	check : function(user, message, room) {
 		if (solver.isQuestion(message)) {
 			try {
 				solver.solveQuestion(message);
@@ -298,7 +298,7 @@ handlers.push({
 		};
 		return false;
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
 		return "x = " + solver.solveQuestion(message);
 	}
 });
@@ -315,14 +315,14 @@ function namedUser(message) {
 
 handlers.push({
 	name : "award taco",
-	check : function awardTacoCheck(user, message) {
+	check : function awardTacoCheck(user, message, room) {
 		const msg = message.split(/ +/);
 		if (!!message.toLowerCase().match(":taco:") && msg.length >= 2 && msg.length <= 5) {
 			return namedUser(message) != "";
 		}
 		return false
 	},
-	do : function awardTacoDo(user, message) {
+	do : function awardTacoDo(user, message, room) {
 		if (!(user in knownUsers)) {
 			trackUser(user, message);
 		}
@@ -358,15 +358,16 @@ let last_to_take_tacos = "";
 
 handlers.push({
 	name : "throw tacos",
-	check : function(user, message) { 
+	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
-		return !!m.match("[^a-z0-1]throw[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30 && 'tacos' in knownUsers[user] && knownUsers[user].tacos > 0;
+		return !!m.match("[^a-z0-1](throw|drop)[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30 && 'tacos' in knownUsers[user] && knownUsers[user].tacos > 0;
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
+		if (room.match('world')) return "That taco command has moved to the #taco channel"
 		let thrown_tacos = Math.min(knownUsers[user].tacos,10);
 		knownUsers[user].tacos -= thrown_tacos;
 		tacos_on_floor += thrown_tacos - 1;
-		return user + " has thrown " + thrown_tacos + " :taco:s on the floor for the taking but 1 was eaten by a software bugs!";
+		return user + " has thrown " + thrown_tacos + " :taco:s on the floor for the taking but 1 was eaten by a software bug!";
 	}
 });
 
@@ -379,11 +380,12 @@ function randAttribute() {
 
 handlers.push({
 	name : "eat tacos",
-	check : function(user, message) { 
+	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
 		return !!m.match("[^a-z0-1]eat[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30 && user in knownUsers && 'tacos' in knownUsers[user] && knownUsers[user].tacos > 0;
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
+		if (room.match('world')) return "That taco command has moved to the #taco channel"
 		if (knownUsers[user].tacos < 10) {
 			return "you need at least 10 tacos to make a proper meal";
 		}
@@ -397,13 +399,34 @@ handlers.push({
 	}
 });
 
+
+handlers.push({
+	name : "taco powers",
+	check : function(user, message, room) { 
+		let m = " "+message.toLowerCase() + " ";
+		return ((!!m.match("[^a-z0-1]taco[^a-z0-1]") && !!m.match("[^a-z0-1]power")) || (!!m.match("[^a-z0-1]get[^a-z0-1]") && !!m.match("[^a-z0-1]attribute"))) && m.length < 30 && user in knownUsers;
+	},
+	do : function(user, message, room) {
+		if (room.match('world')) return "That taco command has moved to the #taco channel";
+		if (!('tacos' in knownUsers[user])) return "You have no tacos";
+		let results = [];
+		for (let attrib of attributes) {
+			if (attrib in knownUsers[user] ) results.push(attrib + " " + knownUsers[user][attrib]);
+		}
+		if (results.length == 0) return "You have no powers";
+		return user + " has " + knownUsers[user].tacos + " tacos and attributes " + results.join(", ");
+	}
+});
+
+
 handlers.push({
 	name : "huntdown tacos",
-	check : function(user, message) { 
+	check : function(user, message, room) { 
 		let m = message.toLowerCase();
 		return !!m.match("^huntdown.*taco");
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
+		if (room.match('world')) return "That taco command has moved to the #taco channel"
 		for(let name of Object.keys(knownUsers)) {
 			if ('tacos' in knownUsers[name] && knownUsers[name].tacos >= 50) {
 				return "Looks like " + name + " has " + knownUsers[name].tacos + " tacos";
@@ -415,13 +438,14 @@ handlers.push({
 
 handlers.push({
 	name : "shakedown tacos",
-	check : function(user, message) { 
+	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
 		return !!m.match("[^a-z0-1]shakedown[^a-z0-1]") && namedUser(message) != "";
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
+		if (room.match('world')) return "That taco command has moved to the #taco channel"
 		// need to use tacos to shake other and other needs tacos
-		if (!('tacos' in knownUsers[user])) return "you need to have :taco:s to do a shakedown";
+		if (!(user in knownUsers && 'tacos' in knownUsers[user])) return "you need to have :taco:s to do a shakedown";
 		if (knownUsers[user].tacos < 3) return "you need at least 3 :taco:s to do a shakedown";
 
 		let other = namedUser(message);
@@ -462,11 +486,12 @@ handlers.push({
 
 handlers.push({
 	name : "take tacos",
-	check : function(user, message) { 
+	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
 		return !!m.match("[^a-z0-1]take[^a-z0-1]") && !!m.match("[^a-z0-1]taco") && m.length < 30;
 	},
-	do : function(user, message) {
+	do : function(user, message, room) {
+		if (room.match('world')) return "That taco command has moved to the #taco channel"
 		if (tacos_on_floor <= 0) {
 			return "aww, there are no tacos to take";
 		}
@@ -490,11 +515,11 @@ handlers.push({
 
 handlers.push({
 	name : "say hi",
-	check : function(user, message) { 
+	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
 		return !!m.match("[^a-z0-1](yo|hi|hey|hello)[^a-z0-1]") && !!m.match("[^a-z0-1]antiwonto") && m.length < 30;
 	},
-	do : function(user, message) { return "hey " + user +". I'm a bot :robot:" }
+	do : function(user, message, room) { return "hey " + user +". I'm a bot :robot:" }
 });
 
 
