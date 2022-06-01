@@ -96,6 +96,7 @@ let handlers = [];
 
 
 handlers.push({
+	contest : true,
 	name : "identify bad words",
 	badwords : rot13('grfgvpyrf phag avttre avtre avtte snt snttbg nff nffubyr shpx shpxre shpxvat cravf chffl fuvg gheq gjng shpxsnpr').split(" ").map(x=>" "+x),
 	check : function (user, message, room) {
@@ -113,6 +114,7 @@ handlers.push({
 });
 
 handlers.push({
+	contest : true,
 	searches : {
 		"exec(bytes": "that looks like python golf compression.  It's legit, and acceptable to use.  You may be interested in this tool https://clemg.github.io/pythongolfer/",
 		"golf compression":"talking aboutt golf Compression? ruby like eval'杓敶恿...栅'.encode(‘UCS-2BE’).b , js lie eval(’’+Buffer('杓敶恿...栅','ucs2') , python like exec(bytes('杓敶恿...栅','u16')[2:])",
@@ -135,6 +137,7 @@ handlers.push({
 });
 
 handlers.push({
+	contest : false,
 	name : "lmgtfy",
 	check : function lmgtfyCheck(user, message, room) {
 		let parts = message.split(" ");
@@ -159,6 +162,7 @@ function cleanDefinitionTerm(term) {
 
 
 handlers.push({
+	contest : false,
 	name : "teach definition",
 	check : function (user, message, room) {
 		if (!(user in SUPER_USERS)) return false;
@@ -196,6 +200,7 @@ handlers.push({
 })
 
 handlers.push({
+	contest : false,
 	name : "remove definition",
 	check : function (user, message, room) {
 		if (!(user in SUPER_USERS)) return false;
@@ -228,6 +233,7 @@ handlers.push({
 
 
 handlers.push({
+	contest : false,
 	name : "share definition",
 	check : function (user, message, room) {
 		const term = cleanDefinitionTerm(message).replace(/whati?s?/,"");
@@ -242,6 +248,7 @@ handlers.push({
 
 
 handlers.push({
+	contest : false,
 	quietSince : Date.now(),
 	quietCooldown : 30 * 60 * 1000, // 60 minutes
 	name : "welcome known user",
@@ -263,6 +270,7 @@ handlers.push({
 
 
 handlers.push({
+	contest : false,
 	lastUnknownUserTime : Date.now(),
 	lastUnknownUserCooldown : 30 * 60 * 1000, // 30 minutes
 	name : "welcome new user",
@@ -274,6 +282,7 @@ handlers.push({
 });
 
 handlers.push({
+	contest : false,
 	name : "what can the bot do",
 	check : function(user, message, room) {
 		message = message.toLowerCase();
@@ -286,6 +295,7 @@ handlers.push({
 
 
 handlers.push({
+	contest : false,
 	name : "solve equation",
 	check : function(user, message, room) {
 		if (solver.isQuestion(message)) {
@@ -314,6 +324,7 @@ function namedUser(message) {
 }
 
 handlers.push({
+	contest : false,
 	name : "award taco",
 	check : function awardTacoCheck(user, message, room) {
 		const msg = message.split(/ +/);
@@ -328,7 +339,7 @@ handlers.push({
 		}
 
 		if ("tacoGiven" in knownUsers[user] && knownUsers[user].tacoGiven == dateTimeZ()[0]) {
-			return "sorry " + user + " but you can only award tacos once per day";
+			return "Sorry but you can only award tacos once per day";
 		}
 
 		if (knownUsers[user].tacos < 3) {
@@ -340,7 +351,26 @@ handlers.push({
 			knownUsers[user].tacoGiven = dateTimeZ()[0];
 			return "You used your taco giving ability for the day to discover that you cannot give tacos to yourself";
 		}
+
+		if (["Automaton2000", "Automaton2020", "AutomatonNN", "antiwonto"].includes(other)) {
+			return "That's a bot.  Bots don't eat tacos";
+		}
+
+		
+		if ('recentTacoGift' in knownUsers[user] && knownUsers[user].recentTacoGift.includes(other)) {
+			if (Math.random() > 0.9) {
+				knownUsers[user].tacoGiven = dateTimeZ()[0];
+				return "You used your taco giving ability for the day to discover that you need to spread the love.  Give tacos to someone else."
+			} else {
+				return "Spread the love.  Give tacos to someone else, not someone you spam with tacos."
+			}
+		}
+
 		if (other in knownUsers) {
+			if (!('recentTacoGift' in knownUsers[user])) knownUsers[user]['recentTacoGift'] = [];
+			knownUsers[user].recentTacoGift.push(other)
+			if (knownUsers[user].recentTacoGift.length > 5) knownUsers[user].recentTacoGift.shift()
+
 			if (!('tacos' in knownUsers[other])) knownUsers[other].tacos = 0;
 			let award = Math.min(10, knownUsers[other].tacos+1, knownUsers[user].tacos);
 			knownUsers[other].tacos += award;
@@ -349,7 +379,7 @@ handlers.push({
 			knownUsers[user].tacoGiven = dateTimeZ()[0];
 			return user + " has awarded " + other + " "+award+" tacos. " + other + " now has " + knownUsers[other].tacos + " taco. " + user + " now has " + knownUsers[user].tacos + " taco";
 		}
-		return "sorry " + user + ", that user can not be found to award tacos to";
+		return "Who is that?";
 	}
 });
 
@@ -357,6 +387,7 @@ let tacos_on_floor = 0;
 let last_to_take_tacos = "";
 
 handlers.push({
+	contest : false,
 	name : "throw tacos",
 	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
@@ -379,6 +410,7 @@ function randAttribute() {
 
 
 handlers.push({
+	contest : false,
 	name : "eat tacos",
 	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
@@ -401,6 +433,7 @@ handlers.push({
 
 
 handlers.push({
+	contest : false,
 	name : "taco powers",
 	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
@@ -413,13 +446,14 @@ handlers.push({
 		for (let attrib of attributes) {
 			if (attrib in knownUsers[user] ) results.push(attrib + " " + knownUsers[user][attrib]);
 		}
-		if (results.length == 0) return "You have no powers";
+		if (results.length == 0) return "You have " + knownUsers[user].tacos + " tacos and no powers";
 		return user + " has " + knownUsers[user].tacos + " tacos and attributes " + results.join(", ");
 	}
 });
 
 
 handlers.push({
+	contest : false,
 	name : "huntdown tacos",
 	check : function(user, message, room) { 
 		let m = message.toLowerCase();
@@ -437,6 +471,7 @@ handlers.push({
 });
 
 handlers.push({
+	contest : false,
 	name : "shakedown tacos",
 	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
@@ -485,6 +520,7 @@ handlers.push({
 
 
 handlers.push({
+	contest : false,
 	name : "take tacos",
 	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
@@ -514,6 +550,7 @@ handlers.push({
 
 
 handlers.push({
+	contest : true,
 	name : "say hi",
 	check : function(user, message, room) { 
 		let m = " "+message.toLowerCase() + " ";
