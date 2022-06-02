@@ -460,13 +460,14 @@ handlers.push({
 		return !!m.match("^huntdown.*taco");
 	},
 	do : function(user, message, room) {
-		if (room.match('world')) return "That taco command has moved to the #taco channel"
-		for(let name of Object.keys(knownUsers)) {
-			if ('tacos' in knownUsers[name] && knownUsers[name].tacos >= 50) {
-				return "Looks like " + name + " has " + knownUsers[name].tacos + " tacos";
-			}
-		}
-		return "Cant find anyone with enough tacos";
+		if (room.match('world')) return "That taco command has moved to the #taco channel";
+
+		let candidates = Object.keys(knownUsers).filter( name => 'tacos' in knownUsers[name] && knownUsers[name].tacos >= 40 );
+
+		if (candidates.length == 0) return "Cant find anyone with enough tacos";
+
+		let name = candidates[Math.floor(Math.random()*candidates.length)];
+		return "Looks like " + name + " has " + knownUsers[name].tacos + " tacos";
 	}
 });
 
