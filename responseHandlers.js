@@ -369,7 +369,7 @@ handlers.push({
 		if (other in knownUsers) {
 			if (!('recentTacoGift' in knownUsers[user])) knownUsers[user]['recentTacoGift'] = [];
 			knownUsers[user].recentTacoGift.push(other)
-			if (knownUsers[user].recentTacoGift.length > 5) knownUsers[user].recentTacoGift.shift()
+			if (knownUsers[user].recentTacoGift.length > 3) knownUsers[user].recentTacoGift.shift()
 
 			if (!('tacos' in knownUsers[other])) knownUsers[other].tacos = 0;
 			let award = Math.min(10, knownUsers[other].tacos+1, knownUsers[user].tacos);
